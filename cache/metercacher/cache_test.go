@@ -1,0 +1,25 @@
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Coinflect, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package metercacher
+
+import (
+	"testing"
+
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/coinflect/coinflectchain/cache"
+)
+
+func TestInterface(t *testing.T) {
+	for _, test := range cache.CacherTests {
+		cache := &cache.LRU{Size: test.Size}
+		c, err := New("", prometheus.NewRegistry(), cache)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		test.Func(t, c)
+	}
+}

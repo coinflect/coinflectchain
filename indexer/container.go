@@ -1,0 +1,18 @@
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Coinflect, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package indexer
+
+import "github.com/coinflect/coinflectchain/ids"
+
+// Container is something that gets accepted
+// (a block, transaction or vertex)
+type Container struct {
+	// ID of this container
+	ID ids.ID `serialize:"true"`
+	// Byte representation of this container
+	Bytes []byte `serialize:"true"`
+	// Unix time, in nanoseconds, at which this container was accepted by this node
+	Timestamp int64 `serialize:"true"`
+}

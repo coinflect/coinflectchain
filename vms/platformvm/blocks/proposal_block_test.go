@@ -1,0 +1,102 @@
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Coinflect, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package blocks
+
+import (
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinflect/coinflectchain/ids"
+	"github.com/coinflect/coinflectchain/vms/components/cflt"
+	"github.com/coinflect/coinflectchain/vms/components/verify"
+	"github.com/coinflect/coinflectchain/vms/platformvm/txs"
+	"github.com/coinflect/coinflectchain/vms/platformvm/validator"
+	"github.com/coinflect/coinflectchain/vms/secp256k1fx"
+)
+
+func TestNewBanffProposalBlock(t *testing.T) {
+	require := require.New(t)
+
+	timestamp := time.Now().Truncate(time.Second)
+	parentID := ids.GenerateTestID()
+	height := uint64(1337)
+
+	tx := &txs.Tx{
+		Unsigned: &txs.AddValidatorTx{
+			BaseTx: txs.BaseTx{
+				BaseTx: cflt.BaseTx{
+					Ins:  []*cflt.TransferableInput{},
+					Outs: []*cflt.TransferableOutput{},
+				},
+			},
+			StakeOuts: []*cflt.TransferableOutput{},
+			Validator: validator.Validator{},
+			RewardsOwner: &secp256k1fx.OutputOwners{
+				Addrs: []ids.ShortID{},
+			},
+		},
+		Creds: []verify.Verifiable{},
+	}
+	require.NoError(tx.Sign(txs.Codec, nil))
+
+	blk, err := NewBanffProposalBlock(
+		timestamp,
+		parentID,
+		height,
+		tx,
+	)
+	require.NoError(err)
+
+	// Make sure the block and tx are initialized
+	require.NotNil(blk.Bytes())
+	require.NotNil(blk.Tx.Bytes())
+	require.NotEqual(ids.Empty, blk.Tx.ID())
+	require.Equal(tx.Bytes(), blk.Tx.Bytes())
+	require.Equal(timestamp, blk.Timestamp())
+	require.Equal(parentID, blk.Parent())
+	require.Equal(height, blk.Height())
+}
+
+func TestNewApricotProposalBlock(t *testing.T) {
+	require := require.New(t)
+
+	parentID := ids.GenerateTestID()
+	height := uint64(1337)
+
+	tx := &txs.Tx{
+		Unsigned: &txs.AddValidatorTx{
+			BaseTx: txs.BaseTx{
+				BaseTx: cflt.BaseTx{
+					Ins:  []*cflt.TransferableInput{},
+					Outs: []*cflt.TransferableOutput{},
+				},
+			},
+			StakeOuts: []*cflt.TransferableOutput{},
+			Validator: validator.Validator{},
+			RewardsOwner: &secp256k1fx.OutputOwners{
+				Addrs: []ids.ShortID{},
+			},
+		},
+		Creds: []verify.Verifiable{},
+	}
+	require.NoError(tx.Sign(txs.Codec, nil))
+
+	blk, err := NewApricotProposalBlock(
+		parentID,
+		height,
+		tx,
+	)
+	require.NoError(err)
+
+	// Make sure the block and tx are initialized
+	require.NotNil(blk.Bytes())
+	require.NotNil(blk.Tx.Bytes())
+	require.NotEqual(ids.Empty, blk.Tx.ID())
+	require.Equal(tx.Bytes(), blk.Tx.Bytes())
+	require.Equal(parentID, blk.Parent())
+	require.Equal(height, blk.Height())
+}

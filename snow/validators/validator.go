@@ -1,0 +1,73 @@
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2022, Coinflect, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
+package validators
+
+import (
+	"math"
+
+	"github.com/coinflect/coinflectchain/ids"
+
+	safemath "github.com/coinflect/coinflectchain/utils/math"
+)
+
+var _ Validator = (*validator)(nil)
+
+// Validator is the minimal description of someone that can be sampled.
+type Validator interface {
+	// ID returns the node ID of this validator
+	ID() ids.NodeID
+
+	// Weight that can be used for weighted sampling. If this validator is
+	// validating the primary network, returns the amount of CFLT staked.
+	Weight() uint64
+}
+
+// validator is a struct that contains the base values required by the validator
+// interface.
+type validator struct {
+	nodeID ids.NodeID
+	weight uint64
+
+	// index is used to efficiently remove validators from the validator set. It
+	// represents the index of this validator in the vdrSlice and weights
+	// arrays.
+	index int
+}
+
+func (v *validator) ID() ids.NodeID {
+	return v.nodeID
+}
+
+func (v *validator) Weight() uint64 {
+	return v.weight
+}
+
+func (v *validator) addWeight(weight uint64) {
+	newTotalWeight, err := safemath.Add64(weight, v.weight)
+	if err != nil {
+		newTotalWeight = math.MaxUint64
+	}
+	v.weight = newTotalWeight
+}
+
+func (v *validator) removeWeight(weight uint64) {
+	newTotalWeight, err := safemath.Sub(v.weight, weight)
+	if err != nil {
+		newTotalWeight = 0
+	}
+	v.weight = newTotalWeight
+}
+
+// NewValidator returns a validator object that implements the Validator
+// interface
+func NewValidator(
+	nodeID ids.NodeID,
+	weight uint64,
+) Validator {
+	return &validator{
+		nodeID: nodeID,
+		weight: weight,
+	}
+}
