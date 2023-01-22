@@ -1,6 +1,6 @@
 # Shared Memory
 
-Shared memory creates a way for blockchains in the Coinflect Ecosystem to communicate with each other by using a shared database to create a bidirectional communication channel between any two blockchains in the same subnet.
+Shared memory creates a way for Blockchains in the Coinflect Ecosystem to communicate with each other by using a shared database to create a bidirectional communication channel between any two blockchains in the same subnet.
 
 ## Shared Database
 
